@@ -1,0 +1,8 @@
+#the output
+flip
+#the PAT txt file
+github PAT.txt
+#the output files
+k*.exp
+#the solutions folder
+solutions
