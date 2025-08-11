@@ -368,7 +368,7 @@ void Scheme::random_walk(int pathlength, int doplus, int earlystop) {
     if (doplus) plus();
     vector<Rank1Tensor> best_tensors = tensors;
     for (int i=0;i<pathlength;i++) {
-        if (move_list.size() == 0) plus(); // possibly just break instead?
+        if (move_list.size() == 0) return; // it might be better to do plus instead. Unsure
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
         if (rand() % 2) {
             if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip))) {
