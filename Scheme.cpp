@@ -16,7 +16,7 @@ bool Scheme::update() {
     move_list.clear();
     // first we ensure each tensor is non-zero
     for (int i=0; i<tensors.size(); i++) {
-        if (tensors[i].a == 0 or tensors[i].b == 0 ot tensors[i].c == 0) {
+        if ((tensors[i].a1 == 0 and tensors[i].b1 == 0) or (tensors[i].a2 == 0 and tensors[i].b2 == 0) or tensors[i].c == 0) {
             tensors.erase(tensors.begin()+i);
             update();
             return true;
@@ -38,21 +38,49 @@ bool Scheme::update() {
     return false;
 }
 
-//REMEMBER TO WRITE IN FORM a0*e^2 ELSE IT WON'T WORK
-
 void Scheme::from_file(string filename) {
-    std::ifstream file(filename);
+    ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "Could not open file for reading: " << filename << std::endl;
+        cerr << "Could not open file for reading: " << filename << endl;
         return;
     }
     tensors.clear();
-    std::string line;
+    string line;
     while (std::getline(file, line)) {
         Rank1Tensor tensor;
         int part = 0;
         int charpoint = 0;
-        
+        while (charpoint < line.size()) {
+            if (line[charpoint] == ')') {
+                part++;
+                charpoint++;
+            } else if (line[charpoint] == 'a') {
+                int i = line[charpoint+1] - '0' - 1;
+                int j = line[charpoint+2] - '0' - 1;
+                if (part == 0) {
+                    tensor.a1 |= 1 << (8*i+j);
+                } else if (part == 1) {
+                    tensor.a2 |= 1 << (8*i+j);
+                } else cerr << "Incorrect format" << endl;
+                charpoint += 3;
+            } else if (line[charpoint] == 'b') {
+                int i = line[charpoint+1] - '0' - 1;
+                int j = line[charpoint+2] - '0' - 1;
+                if (part == 0) {
+                    tensor.b1 |= 1 << (8*i+j);
+                } else if (part == 1) {
+                    tensor.b2 |= 1 << (8*i+j);
+                } else cerr << "Incorrect format" << endl;
+                charpoint += 3;
+            } else if (line[charpoint] == 'c') {
+                int i = line[charpoint+1] - '0' - 1;
+                int j = line[charpoint+2] - '0' - 1;
+                if (part == 2) {
+                    tensor.c |= 1 << (8*i+j);
+                } else cerr << "Incorrect format" << endl;
+                charpoint += 3;
+            } else charpoint++;
+        }
         tensors.push_back(tensor);
     }
     file.close();

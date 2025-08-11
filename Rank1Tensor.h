@@ -2,6 +2,8 @@
 #define RANK1TENSOR_H
 #include <string>
 
+using namespace std;
+
 class Rank1Tensor {
 public:
     unsigned long a1;
@@ -12,7 +14,7 @@ public:
 
     Rank1Tensor() : a1{}, b1{}, a2{}, b2{}, c{} {};
 
-    std::string to_string();
+    string to_string();
 };
 
 #endif //RANK1TENSOR_H
