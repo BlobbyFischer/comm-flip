@@ -294,6 +294,68 @@ bool Scheme::flip(int ind1, int ind2, char flip_around1, char flip_around2) {
     return false;
 }
 
+void Scheme::plus() {
+    int ind1 = rand() % tensors.size();
+    int ind2 = rand() % (tensors.size() - 1);
+    if (ind2 >= ind1) ind2++;
+    Rank1Tensor& tensor1 = tensors[ind1];
+    Rank1Tensor& tensor2 = tensors[ind2];
+    // now do a plus between them
+    Rank1Tensor newtensor;
+    short choice = rand() % 5;
+    if (choice == 0) {
+        newtensor.a1 = tensor1.a1 ^ tensor2.a1;
+        newtensor.b1 = tensor1.b1 ^ tensor2.b1;
+        newtensor.a2 = tensor1.a2;
+        newtensor.b2 = tensor1.b2;
+        newtensor.c = tensor1.c;
+        tensor1.a1 = tensor2.a1;
+        tensor1.b1 = tensor2.b1;
+        tensors.push_back(newtensor);
+        flip(ind1,ind2,'a','a');
+    } else if (choice == 1) {
+        newtensor.a1 = tensor1.a1 ^ tensor2.a2;
+        newtensor.b1 = tensor1.b1 ^ tensor2.b2;
+        newtensor.a2 = tensor1.a1;
+        newtensor.b2 = tensor1.b1;
+        newtensor.c = tensor1.c;
+        tensor1.a1 = tensor2.a2;
+        tensor1.b1 = tensor2.b2;
+        tensors.push_back(newtensor);
+        flip(ind1,ind2,'a','b');
+    } else if (choice == 2) {
+        newtensor.a1 = tensor1.a2 ^ tensor2.a1;
+        newtensor.b1 = tensor1.b2 ^ tensor2.b1;
+        newtensor.a2 = tensor1.a1;
+        newtensor.b2 = tensor1.b1;
+        newtensor.c = tensor1.c;
+        tensor1.a2 = tensor2.a1;
+        tensor1.b2 = tensor2.b1;
+        tensors.push_back(newtensor);
+        flip(ind1,ind2,'b','a');
+    } else if (choice == 3) {
+        newtensor.a1 = tensor1.a2 ^ tensor2.a2;
+        newtensor.b1 = tensor1.b2 ^ tensor2.b2;
+        newtensor.a2 = tensor1.a1;
+        newtensor.b2 = tensor1.b1;
+        newtensor.c = tensor1.c;
+        tensor1.a2 = tensor2.a2;
+        tensor1.b2 = tensor2.b2;
+        tensors.push_back(newtensor);
+        flip(ind1,ind2,'b','b');
+    } else {
+        newtensor.a1 = tensor1.a1;
+        newtensor.b1 = tensor1.b1;
+        newtensor.a2 = tensor1.a2;
+        newtensor.b2 = tensor1.b2;
+        newtensor.c = tensor1.c ^ tensor2.c;
+        tensor1.c = tensor2.c;
+        tensors.push_back(newtensor);
+        flip(ind1,ind2,'c','c');
+    }
+    update();
+}
+
 void Scheme::print() {
     for (size_t i=0;i<tensors.size();i++) {
         Rank1Tensor& tensor = tensors[i];
@@ -302,14 +364,15 @@ void Scheme::print() {
 }
 
 void Scheme::random_walk(int pathlength, int earlystop) {
-    //Scheme compare_against = expanded(*this);
+    int init_rank = tensors.size();
+    plus();
     for (int i=0;i<pathlength;i++) {
         if (move_list.size() == 0) break;
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
         if (rand() % 2) {
-            if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip)) && earlystop) return;
+            if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip)) && earlystop) if (tensors.size() < init_rank) return;
         } else {
-            if (flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip)) && earlystop) return;
+            if (flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip)) && earlystop) if (tensors.size() < init_rank) return;
         }
     }
 }
