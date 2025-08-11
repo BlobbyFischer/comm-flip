@@ -18,7 +18,7 @@ public:
     void from_file(string filename);
 
     bool update();
-    bool flip(int ind1, int ind2, char flip_around);
+    bool flip(int ind1, int ind2, char flip_around1, char flip_around2);
 
     void random_walk(int pathlength, int earlystop);
 

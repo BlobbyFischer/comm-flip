@@ -18,7 +18,7 @@ bool Scheme::update() {
     for (int i=0; i<tensors.size(); i++) {
         if ((tensors[i].a1 == 0 and tensors[i].b1 == 0) or (tensors[i].a2 == 0 and tensors[i].b2 == 0) or tensors[i].c == 0) {
             tensors.erase(tensors.begin()+i);
-            update();
+            update(); // very inefficient but should be so rare it doesn't really matter
             return true;
         }
     }
@@ -108,10 +108,190 @@ void Scheme::write_to_file() {
     }
 }
 
-bool Scheme::flip(int ind1, int ind2, char flip_around) {
+bool Scheme::flip(int ind1, int ind2, char flip_around1, char flip_around2) {
     Rank1Tensor& tensor1 = tensors[ind1];
     Rank1Tensor& tensor2 = tensors[ind2];
-    return update();
+    if (flip_around1 == 'a' && flip_around2 == 'a') {
+        // remove unwanted flips
+        size_t i = 0;
+        while (i<move_list.size()) {
+            if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'b') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'c') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'c')) move_list.erase(move_list.begin()+i);
+            else i++;
+        }
+        // do flip
+        tensor1.a2 ^= tensor2.a2;
+        tensor1.b2 ^= tensor2.b2;
+        tensor2.c ^= tensor1.c;
+        // check for reduction
+        if ((tensor1.a2 == 0 && tensor1.b2 == 0) || tensor2.c == 0) return update();
+        // add flips back to move_list
+        for (size_t i=0; i<tensors.size();i++) {
+            Rank1Tensor& tensori = tensors[i];
+            // is there a flip?
+            if (tensor1.a2 == tensori.a1 && tensor1.b2 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','a'));
+            if (tensor1.a2 == tensori.a2 && tensor1.b2 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','b'));
+            if (tensor2.c == tensori.c && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'c','c'));
+        }
+    } else if (flip_around1 == 'a' && flip_around2 == 'b') {
+        // remove unwanted flips
+        size_t i = 0;
+        while (i<move_list.size()) {
+            if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'b') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'c') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'c')) move_list.erase(move_list.begin()+i);
+            else i++;
+        }
+        // do flip
+        tensor1.a2 ^= tensor2.a1;
+        tensor1.b2 ^= tensor2.b1;
+        tensor2.c ^= tensor1.c;
+        // check for reduction
+        if ((tensor1.a2 == 0 && tensor1.b2 == 0) || tensor2.c == 0) return update();
+        // add flips back to move_list
+        for (size_t i=0; i<tensors.size();i++) {
+            Rank1Tensor& tensori = tensors[i];
+            // is there a flip?
+            if (tensor1.a2 == tensori.a1 && tensor1.b2 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','a'));
+            if (tensor1.a2 == tensori.a2 && tensor1.b2 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','b'));
+            if (tensor2.c == tensori.c && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'c','c'));
+        }
+    } else if (flip_around1 == 'b' && flip_around2 == 'a') {
+        // remove unwanted flips
+        size_t i = 0;
+        while (i<move_list.size()) {
+            if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'a') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'c') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'c')) move_list.erase(move_list.begin()+i);
+            else i++;
+        }
+        // do flip
+        tensor1.a1 ^= tensor2.a2;
+        tensor1.b1 ^= tensor2.b2;
+        tensor2.c ^= tensor1.c;
+        // check for reduction
+        if ((tensor1.a1 == 0 && tensor1.b1 == 0) || tensor2.c == 0) return update();
+        // add flips back to move_list
+        for (size_t i=0; i<tensors.size();i++) {
+            Rank1Tensor& tensori = tensors[i];
+            // is there a flip?
+            if (tensor1.a1 == tensori.a1 && tensor1.b1 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','a'));
+            if (tensor1.a1 == tensori.a2 && tensor1.b1 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','b'));
+            if (tensor2.c == tensori.c && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'c','c'));
+        }
+    } else if (flip_around1 == 'b' && flip_around2 == 'b') {
+        // remove unwanted flips
+        size_t i = 0;
+        while (i<move_list.size()) {
+            if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'a') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'c') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'c')) move_list.erase(move_list.begin()+i);
+            else i++;
+        }
+        // do flip
+        tensor1.a1 ^= tensor2.a1;
+        tensor1.b1 ^= tensor2.b1;
+        tensor2.c ^= tensor1.c;
+        // check for reduction
+        if ((tensor1.a1 == 0 && tensor1.b1 == 0) || tensor2.c == 0) return update();
+        // add flips back to move_list
+        for (size_t i=0; i<tensors.size();i++) {
+            Rank1Tensor& tensori = tensors[i];
+            // is there a flip?
+            if (tensor1.a1 == tensori.a1 && tensor1.b1 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','a'));
+            if (tensor1.a1 == tensori.a2 && tensor1.b1 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','b'));
+            if (tensor2.c == tensori.c && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'c','c'));
+        }
+    } else if (flip_around1 == 'c' && flip_around2 == 'c') {
+        short choice = rand() % 4;
+        if (choice == 0) {
+            // remove unwanted flips
+            size_t i = 0;
+            while (i<move_list.size()) {
+                if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'a') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'b')) move_list.erase(move_list.begin()+i);
+                else i++;
+            }
+            // do flip
+            tensor1.a1 ^= tensor2.a1;
+            tensor1.b1 ^= tensor2.b1;
+            tensor2.a2 ^= tensor1.a2;
+            tensor2.b2 ^= tensor1.b2;
+            // check for reduction
+            if ((tensor1.a1 == 0 && tensor1.b1 == 0) || (tensor2.a2 == 0 && tensor2.b2 == 0)) return update();
+            // add flips back to move_list
+            for (size_t i=0; i<tensors.size();i++) {
+                Rank1Tensor& tensori = tensors[i];
+                // is there a flip?
+                if (tensor1.a1 == tensori.a1 && tensor1.b1 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','a'));
+                if (tensor1.a1 == tensori.a2 && tensor1.b1 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','b'));
+                if (tensor2.a2 == tensori.a1 && tensor2.b2 == tensori.b1 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'b','a'));
+                if (tensor2.a2 == tensori.a2 && tensor2.b2 == tensori.b2 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'b','b'));
+            }
+        } else if (choice == 1) {
+            // remove unwanted flips
+            size_t i = 0;
+            while (i<move_list.size()) {
+                if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'a') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'a')) move_list.erase(move_list.begin()+i);
+                else i++;
+            }
+            // do flip
+            tensor1.a1 ^= tensor2.a2;
+            tensor1.b1 ^= tensor2.b2;
+            tensor2.a1 ^= tensor1.a2;
+            tensor2.b1 ^= tensor1.b2;
+            // check for reduction
+            if ((tensor1.a1 == 0 && tensor1.b1 == 0) || (tensor2.a1 == 0 && tensor2.b1 == 0)) return update();
+            // add flips back to move_list
+            for (size_t i=0; i<tensors.size();i++) {
+                Rank1Tensor& tensori = tensors[i];
+                // is there a flip?
+                if (tensor1.a1 == tensori.a1 && tensor1.b1 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','a'));
+                if (tensor1.a1 == tensori.a2 && tensor1.b1 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'a','b'));
+                if (tensor2.a1 == tensori.a1 && tensor2.b1 == tensori.b1 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'a','a'));
+                if (tensor2.a1 == tensori.a2 && tensor2.b1 == tensori.b2 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'a','b'));
+            }
+        } else if (choice == 2) {
+            // remove unwanted flips
+            size_t i = 0;
+            while (i<move_list.size()) {
+                if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'b') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'b')) move_list.erase(move_list.begin()+i);
+                else i++;
+            }
+            // do flip
+            tensor1.a2 ^= tensor2.a1;
+            tensor1.b2 ^= tensor2.b1;
+            tensor2.a2 ^= tensor1.a1;
+            tensor2.b2 ^= tensor1.b1;
+            // check for reduction
+            if ((tensor1.a2 == 0 && tensor1.b2 == 0) || (tensor2.a2 == 0 && tensor2.b2 == 0)) return update();
+            // add flips back to move_list
+            for (size_t i=0; i<tensors.size();i++) {
+                Rank1Tensor& tensori = tensors[i];
+                // is there a flip?
+                if (tensor1.a2 == tensori.a1 && tensor1.b2 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','a'));
+                if (tensor1.a2 == tensori.a2 && tensor1.b2 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','b'));
+                if (tensor2.a2 == tensori.a1 && tensor2.b2 == tensori.b1 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'b','a'));
+                if (tensor2.a2 == tensori.a2 && tensor2.b2 == tensori.b2 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'b','b'));
+            }
+        } else {
+            // remove unwanted flips
+            size_t i = 0;
+            while (i<move_list.size()) {
+                if ((get<0>(move_list[i]) == ind1 && get<2>(move_list[i]) == 'b') || (get<0>(move_list[i]) == ind2 && get<2>(move_list[i]) == 'a') || (get<1>(move_list[i]) == ind1 && get<3>(move_list[i]) == 'b') || (get<1>(move_list[i]) == ind2 && get<3>(move_list[i]) == 'a')) move_list.erase(move_list.begin()+i);
+                else i++;
+            }
+            // do flip
+            tensor1.a2 ^= tensor2.a2;
+            tensor1.b2 ^= tensor2.b2;
+            tensor2.a1 ^= tensor1.a1;
+            tensor2.b1 ^= tensor1.b1;
+            // check for reduction
+            if ((tensor1.a2 == 0 && tensor1.b2 == 0) || (tensor2.a1 == 0 && tensor2.b1 == 0)) return update();
+            // add flips back to move_list
+            for (size_t i=0; i<tensors.size();i++) {
+                Rank1Tensor& tensori = tensors[i];
+                // is there a flip?
+                if (tensor1.a2 == tensori.a1 && tensor1.b2 == tensori.b1 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','a'));
+                if (tensor1.a2 == tensori.a2 && tensor1.b2 == tensori.b2 && i != ind1) move_list.push_back(tuple<int,int,char,char>(ind1,i,'b','b'));
+                if (tensor2.a1 == tensori.a1 && tensor2.b1 == tensori.b1 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'a','a'));
+                if (tensor2.a1 == tensori.a2 && tensor2.b1 == tensori.b2 && i != ind2) move_list.push_back(tuple<int,int,char,char>(ind2,i,'a','b'));
+            }
+        }
+    }
+    return false;
 }
 
 void Scheme::print() {
@@ -126,63 +306,10 @@ void Scheme::random_walk(int pathlength, int earlystop) {
     for (int i=0;i<pathlength;i++) {
         if (move_list.size() == 0) break;
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
-    }
-}
-
-/*
-void Scheme::check() {
-    for (int pow=0;pow<MAX_ORDER;pow++) {
-        for (int i=0;i<N;i++) {
-            for (int j=0;j<N;j++) {
-                for (int k=0;k<N;k++) {
-                    int counter = 0;
-                    for (int ind=0;ind<tensors.size();ind++) {
-                        Rank1Tensor tensor = tensors[ind];
-                        for (int pow1=0;pow1<=pow;pow1++) {
-                            for (int pow2=0;pow1+pow2+tensor.coeff<=pow;pow2++){
-                                if (tensor.a[pow1][i] and tensor.b[pow2][j] and tensor.c[pow-pow1-pow2-tensor.coeff][k]){
-                                    counter = 1-counter;
-                                }
-                            }
-                        }
-                    }
-                    if (counter == 1) {
-                        cout << "a" << i << " b" << j << " c" << k << " * e^" << pow << endl;
-                    }
-                }
-            }
+        if (rand() % 2) {
+            flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip));
+        } else {
+            flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip));
         }
     }
 }
-
-Scheme expanded(Scheme input_scheme) {
-    Scheme output;
-    for (int pow=0;pow<MAX_ORDER;pow++) {
-        for (int i=0;i<N;i++) {
-            for (int j=0;j<N;j++) {
-                for (int k=0;k<N;k++) {
-                    int counter = 0;
-                    for (int ind=0;ind<input_scheme.tensors.size();ind++) {
-                        Rank1Tensor tensor = input_scheme.tensors[ind];
-                        for (int pow1=0;pow1<=pow;pow1++) {
-                            for (int pow2=0;pow1+pow2+tensor.coeff<=pow;pow2++){
-                                if (tensor.a[pow1][i] and tensor.b[pow2][j] and tensor.c[pow-pow1-pow2-tensor.coeff][k]){
-                                    counter = 1-counter;
-                                }
-                            }
-                        }
-                    }
-                    if (counter == 1) {
-                        Rank1Tensor new_tensor;
-                        new_tensor.a[0].set(i);
-                        new_tensor.b[0].set(j);
-                        new_tensor.c[0].set(k);
-                        new_tensor.coeff = pow;
-                        output.tensors.push_back(new_tensor);
-                    }
-                }
-            }
-        }
-    }
-    return output;
-}*/
