@@ -307,9 +307,9 @@ void Scheme::random_walk(int pathlength, int earlystop) {
         if (move_list.size() == 0) break;
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
         if (rand() % 2) {
-            flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip));
+            if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip)) && earlystop) return;
         } else {
-            flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip));
+            if (flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip)) && earlystop) return;
         }
     }
 }
