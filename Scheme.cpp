@@ -363,16 +363,28 @@ void Scheme::print() {
     }
 }
 
-void Scheme::random_walk(int pathlength, int earlystop) {
+void Scheme::random_walk(int pathlength, int doplus, int earlystop) {
     int init_rank = tensors.size();
-    plus();
+    if (doplus) plus();
+    vector<Rank1Tensor> best_tensors = tensors;
     for (int i=0;i<pathlength;i++) {
-        if (move_list.size() == 0) break;
+        if (move_list.size() == 0) plus(); // possibly just break instead?
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
         if (rand() % 2) {
-            if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip)) && earlystop) if (tensors.size() < init_rank) return;
+            if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip))) {
+                if (tensors.size() < init_rank) {
+                    if (earlystop) return;
+                    else best_tensors = tensors;
+                }
+            }
         } else {
-            if (flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip)) && earlystop) if (tensors.size() < init_rank) return;
+            if (flip(get<1>(next_flip),get<0>(next_flip),get<3>(next_flip),get<2>(next_flip))) {
+                if (tensors.size() < init_rank) {
+                    if (earlystop) return;
+                    else best_tensors = tensors;
+                }
+            }
         }
     }
+    if (best_tensors.size() < init_rank) tensors = best_tensors;
 }

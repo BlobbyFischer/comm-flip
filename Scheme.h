@@ -21,7 +21,7 @@ public:
     bool flip(int ind1, int ind2, char flip_around1, char flip_around2);
     void plus();
 
-    void random_walk(int pathlength, int earlystop);
+    void random_walk(int pathlength, int doplus, int earlystop);
 
     void write_to_file();
     void print();
