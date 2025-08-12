@@ -1,6 +1,7 @@
 #include <iostream>
 #include <ctime>
 #include <unistd.h>
+#include <cstdint>
 
 #include "Scheme.h"
 
@@ -19,9 +20,9 @@ int main(int argc, char* argv[])
     int pathlength = stoi(argv[2]);
     int doplus;
     int earlystop;
-    if (argc>3) doplus = stoi(argv[2]);
+    if (argc>3) doplus = stoi(argv[3]);
     else doplus = 0;
-    if (argc>4) earlystop = stoi(argv[3]);
+    if (argc>4) earlystop = stoi(argv[4]);
     else earlystop = 0;
     Scheme scheme;
     scheme.from_file(filename);

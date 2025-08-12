@@ -58,25 +58,25 @@ void Scheme::from_file(string filename) {
                 int i = line[charpoint+1] - '0' - 1;
                 int j = line[charpoint+2] - '0' - 1;
                 if (part == 0) {
-                    tensor.a1 |= 1 << (8*i+j);
+                    tensor.a1 |= 1ULL << (8*i+j);
                 } else if (part == 1) {
-                    tensor.a2 |= 1 << (8*i+j);
+                    tensor.a2 |= 1ULL << (8*i+j);
                 } else cerr << "Incorrect format" << endl;
                 charpoint += 3;
             } else if (line[charpoint] == 'b') {
                 int i = line[charpoint+1] - '0' - 1;
                 int j = line[charpoint+2] - '0' - 1;
                 if (part == 0) {
-                    tensor.b1 |= 1 << (8*i+j);
+                    tensor.b1 |= 1ULL << (8*i+j);
                 } else if (part == 1) {
-                    tensor.b2 |= 1 << (8*i+j);
+                    tensor.b2 |= 1ULL << (8*i+j);
                 } else cerr << "Incorrect format" << endl;
                 charpoint += 3;
             } else if (line[charpoint] == 'c') {
                 int i = line[charpoint+1] - '0' - 1;
                 int j = line[charpoint+2] - '0' - 1;
                 if (part == 2) {
-                    tensor.c |= 1 << (8*i+j);
+                    tensor.c |= 1ULL << (8*i+j);
                 } else cerr << "Incorrect format" << endl;
                 charpoint += 3;
             } else charpoint++;
@@ -296,64 +296,76 @@ bool Scheme::flip(int ind1, int ind2, char flip_around1, char flip_around2) {
 
 void Scheme::plus() {
     int ind1 = rand() % tensors.size();
-    int ind2 = rand() % (tensors.size() - 1);
-    if (ind2 >= ind1) ind2++;
-    Rank1Tensor& tensor1 = tensors[ind1];
-    Rank1Tensor& tensor2 = tensors[ind2];
-    // now do a plus between them
-    Rank1Tensor newtensor;
-    short choice = rand() % 5;
-    if (choice == 0) {
-        newtensor.a1 = tensor1.a1 ^ tensor2.a1;
-        newtensor.b1 = tensor1.b1 ^ tensor2.b1;
-        newtensor.a2 = tensor1.a2;
-        newtensor.b2 = tensor1.b2;
-        newtensor.c = tensor1.c;
-        tensor1.a1 = tensor2.a1;
-        tensor1.b1 = tensor2.b1;
-        tensors.push_back(newtensor);
-        flip(ind1,ind2,'a','a');
-    } else if (choice == 1) {
-        newtensor.a1 = tensor1.a1 ^ tensor2.a2;
-        newtensor.b1 = tensor1.b1 ^ tensor2.b2;
-        newtensor.a2 = tensor1.a1;
-        newtensor.b2 = tensor1.b1;
-        newtensor.c = tensor1.c;
-        tensor1.a1 = tensor2.a2;
-        tensor1.b1 = tensor2.b2;
-        tensors.push_back(newtensor);
-        flip(ind1,ind2,'a','b');
-    } else if (choice == 2) {
-        newtensor.a1 = tensor1.a2 ^ tensor2.a1;
-        newtensor.b1 = tensor1.b2 ^ tensor2.b1;
-        newtensor.a2 = tensor1.a1;
-        newtensor.b2 = tensor1.b1;
-        newtensor.c = tensor1.c;
-        tensor1.a2 = tensor2.a1;
-        tensor1.b2 = tensor2.b1;
-        tensors.push_back(newtensor);
-        flip(ind1,ind2,'b','a');
-    } else if (choice == 3) {
-        newtensor.a1 = tensor1.a2 ^ tensor2.a2;
-        newtensor.b1 = tensor1.b2 ^ tensor2.b2;
-        newtensor.a2 = tensor1.a1;
-        newtensor.b2 = tensor1.b1;
-        newtensor.c = tensor1.c;
-        tensor1.a2 = tensor2.a2;
-        tensor1.b2 = tensor2.b2;
-        tensors.push_back(newtensor);
-        flip(ind1,ind2,'b','b');
-    } else {
-        newtensor.a1 = tensor1.a1;
-        newtensor.b1 = tensor1.b1;
-        newtensor.a2 = tensor1.a2;
-        newtensor.b2 = tensor1.b2;
-        newtensor.c = tensor1.c ^ tensor2.c;
-        tensor1.c = tensor2.c;
-        tensors.push_back(newtensor);
-        flip(ind1,ind2,'c','c');
+    int ind2 = rand() % (tensors.size()-1);
+    if (ind2 >= ind1) {
+        ind2++;
     }
-    update();
+    Rank1Tensor newrow;
+    int cc = rand() % 6;
+    if (cc == 0) {
+        newrow.a1 = tensors[ind1].a1;
+        newrow.b1 = tensors[ind1].b1;
+        newrow.a2 = tensors[ind2].a2;
+        newrow.b2 = tensors[ind2].b2;
+        newrow.c = tensors[ind1].c ^ tensors[ind2].c;
+        tensors.push_back(newrow);
+        tensors[ind1].a2 ^= tensors[ind2].a2;
+        tensors[ind1].b2 ^= tensors[ind2].b2;
+        tensors[ind2].a1 ^= tensors[ind1].a1;
+        tensors[ind2].b1 ^= tensors[ind1].b1;
+    } else if (cc == 1) {
+        newrow.a1 = tensors[ind1].a1;
+        newrow.b1 = tensors[ind1].b1;
+        newrow.a2 = tensors[ind2].a1;
+        newrow.b2 = tensors[ind2].b1;
+        newrow.c = tensors[ind1].c ^ tensors[ind2].c;
+        tensors.push_back(newrow);
+        tensors[ind1].a2 ^= tensors[ind2].a1;
+        tensors[ind1].b2 ^= tensors[ind2].b1;
+        tensors[ind2].a2 ^= tensors[ind1].a1;
+        tensors[ind2].b2 ^= tensors[ind1].b1;
+    } else if (cc == 2) {
+        newrow.a1 = tensors[ind1].a1 ^ tensors[ind2].a1;
+        newrow.b1 = tensors[ind1].b1 ^ tensors[ind2].b1;
+        newrow.a2 = tensors[ind1].a2;
+        newrow.b2 = tensors[ind1].b2;
+        newrow.c = tensors[ind2].c;
+        tensors.push_back(newrow);
+        tensors[ind1].c ^= tensors[ind2].c;
+        tensors[ind2].a2 ^= tensors[ind1].a2;
+        tensors[ind2].b2 ^= tensors[ind1].b2;
+    } else if (cc == 3) {
+        newrow.a1 = tensors[ind1].a1 ^ tensors[ind2].a2;
+        newrow.b1 = tensors[ind1].b1 ^ tensors[ind2].b2;
+        newrow.a2 = tensors[ind1].a2;
+        newrow.b2 = tensors[ind1].b2;
+        newrow.c = tensors[ind2].c;
+        tensors.push_back(newrow);
+        tensors[ind1].c ^= tensors[ind2].c;
+        tensors[ind2].a1 ^= tensors[ind1].a2;
+        tensors[ind2].b1 ^= tensors[ind1].b2;
+    } else if (cc == 4) {
+        newrow.a1 = tensors[ind2].a1;
+        newrow.b1 = tensors[ind2].b1;
+        newrow.a2 = tensors[ind1].a2 ^ tensors[ind2].a2;
+        newrow.b2 = tensors[ind1].b2 ^ tensors[ind2].b2;
+        newrow.c = tensors[ind1].c;
+        tensors.push_back(newrow);
+        tensors[ind2].c ^= tensors[ind1].c;
+        tensors[ind1].a1 ^= tensors[ind2].a1;
+        tensors[ind1].b1 ^= tensors[ind2].b1;
+    } else if (cc == 5) {
+        newrow.a1 = tensors[ind2].a2;
+        newrow.b1 = tensors[ind2].b2;
+        newrow.a2 = tensors[ind1].a2 ^ tensors[ind2].a1;
+        newrow.b2 = tensors[ind1].b2 ^ tensors[ind2].b1;
+        newrow.c = tensors[ind1].c;
+        tensors.push_back(newrow);
+        tensors[ind2].c ^= tensors[ind1].c;
+        tensors[ind1].a1 ^= tensors[ind2].a2;
+        tensors[ind1].b1 ^= tensors[ind2].b2;
+    }
+    update(); // Always full update after 'plus', indices might have been a bit weird and this isn't called often
 }
 
 void Scheme::print() {
@@ -365,10 +377,10 @@ void Scheme::print() {
 
 void Scheme::random_walk(int pathlength, int doplus, int earlystop) {
     int init_rank = tensors.size();
-    if (doplus) plus();
     vector<Rank1Tensor> best_tensors = tensors;
     for (int i=0;i<pathlength;i++) {
         if (move_list.size() == 0) return; // it might be better to do plus instead. Unsure
+        if (i % 10000 == 0 && doplus) if (tensors.size() <= init_rank) plus(); // I have no evidence this is a sensible way to do this, but it is very similar to what Arai et al did
         tuple<int,int,char,char> next_flip = move_list[rand() % move_list.size()];
         if (rand() % 2) {
             if (flip(get<0>(next_flip),get<1>(next_flip),get<2>(next_flip),get<3>(next_flip))) {

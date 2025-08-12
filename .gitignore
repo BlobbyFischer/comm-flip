@@ -6,3 +6,8 @@ github PAT.txt
 k*.exp
 #the solutions folder
 solutions
+#helper python/sage files (for folder management)
+*.py
+!down.py
+#the above is an important file for understanding how the search works
+*.sage

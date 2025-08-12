@@ -6,11 +6,11 @@ using namespace std;
 
 class Rank1Tensor {
 public:
-    unsigned long a1;
-    unsigned long b1;
-    unsigned long a2;
-    unsigned long b2;
-    unsigned long c;
+    uint64_t a1;
+    uint64_t b1;
+    uint64_t a2;
+    uint64_t b2;
+    uint64_t c;
 
     Rank1Tensor() : a1{}, b1{}, a2{}, b2{}, c{} {};
 
