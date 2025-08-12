@@ -11,3 +11,5 @@ solutions
 !down.py
 #the above is an important file for understanding how the search works
 *.sage
+#the logs
+*.log
