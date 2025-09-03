@@ -35,7 +35,7 @@ This repository contains the code and the data for the publication https://arxiv
       x15/  # search results from method denoted by x of rank 15
       y14/  # search results from method denoted by y of rank 14
   ```
-
+  Note that the only tensors included in the repo are example1 and example2 which are the `<2,2,2>` and `<3,3,3>` matrix multiplication tensors.
 ### Python Scripts
 
 - `down.py`  
@@ -63,7 +63,7 @@ To run a single flip graph search:
 ./flip 222.exp 100000
 ```
 
-- `222.exp`: Input decomposition (e.g., rank 8 standard `<2,2,2>` tensor).
+- `222.exp`: Input decomposition (e.g., rank 8 standard `<2,2,2>` tensor decomposition).
 - `100000`: Number of steps to explore in the flip graph.
 
 Output:
@@ -91,7 +91,8 @@ Use `down.py` for larger, automated searches.
   - `x`, `y` = prefixes representing different starting strategies (e.g., standard, Marakov-like).
   - Each subfolder contains one or more `.exp` files to search from.
 
-### Example Command
+### Example Command (Try it now!)
+You can immediately run the following command on the included example to see the flip graph search in action:
 
 ```bash
 python3 down.py example1 x 10000 100 25 8
