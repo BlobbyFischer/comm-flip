@@ -13,25 +13,25 @@ from pathlib import Path
 FOLDER_NAME = sys.argv[1] if len(sys.argv) > 1 else None
 
 if FOLDER_NAME is None:
-    print("Usage: python alldown.py <folder> <prefix> (<pathlength> <processors>)")
+    print("Usage: python down.py <folder> <prefix> (<pathlength> <failed reductions needed> <reductions needed> <processors>)")
     sys.exit(1)
 
 
 PREFIX = sys.argv[2] if len(sys.argv)>2 else None
 
 if PREFIX is None:
-    print("Usage: python alldown.py <folder> <prefix> (<pathlength> <processors>)")
+    print("Usage: python down.py <folder> <prefix> (<pathlength> <failed reductions needed> <reductions needed> <processors>)")
     sys.exit(1)
 
 
 PATHLENGTH = sys.argv[3] if len(sys.argv)>3 else '10000000'
 
+TOTAL_NO_REDUCTION_FLIPS_THRESHOLD = int(sys.argv[4]) if len(sys.argv)>4 else 1024 # Total ./flip calls (across all threads) that yield no reduction before moving to next size.
 
-PARALLEL_INSTANCES = int(sys.argv[4]) if len(sys.argv)>4 else 32
+TOTAL_REDUCTIONS_FOUND_THRESHOLD = int(sys.argv[5]) if len(sys.argv)>5 else 256 # Number of *distinct rank reductions* found before moving to the new target rank.
 
+PARALLEL_INSTANCES = int(sys.argv[6]) if len(sys.argv)>6 else 8
 
-TOTAL_NO_REDUCTION_FLIPS_THRESHOLD = 1024 # Total ./flip calls (across all threads) that yield no reduction before moving to next size.
-TOTAL_REDUCTIONS_FOUND_THRESHOLD = 256 # Number of *distinct rank reductions* found before moving to the new target rank.
 
 def find_lowest_rank_dir():
     for lowest_rank in range(256):
