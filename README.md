@@ -1,6 +1,6 @@
-# Commutative Matrix Multiplication via Flip Graphs
+# Exploring Commutative Matrix Multiplication Schemes via Flip Graphs
 
-This project contains C++ and Python code developed for a research paper on finding **commutative matrix multiplication schemes** using a **flip graph** approach.
+This repository contains the code and the data for the publication https://arxiv.org/pdf/2506.22113.
 
 ---
 
@@ -9,30 +9,31 @@ This project contains C++ and Python code developed for a research paper on find
 ### C++ Core
 
 - `Rank1Tensor.cpp`, `Rank1Tensor.h`  
-  Define the `Rank1Tensor` class representing individual rank-1 tensors that sum to form a full tensor.
+  Define the `Rank1Tensor` class representing individual rank 1 tensors that sum to form a full tensor.
 
 - `Scheme.cpp`, `Scheme.h`  
-  Define the `Scheme` class representing a full decomposition into rank-1 tensors. Implements the flip graph exploration logic.
+  Define the `Scheme` class representing a full decomposition into rank 1 tensors. Implements the flip graph exploration logic.
 
 - `main.cpp`  
   Entry point for the program. Takes an input tensor decomposition and performs the flip graph search.
 
-- `Makefile`  
+- `makefile`  
   Use `make` to compile the C++ code.
 
 ### Decompositions & Results
 
 - `*.exp`  
-  Files representing tensor decompositions. Each line is a rank-1 tensor. For example, `222.exp` is the standard `<2,2,2>` matrix multiplication tensor.
+  Files representing tensor decompositions. Each line is a rank 1 tensor. For example, `222.exp` is the standard `<2,2,2>` matrix multiplication tensor.
 
 - `solutions/`  
   Contains output decompositions organized by tensor and rank.  
   Structure:
   ```
   solutions/
-    example1/
-      x8/  # Standard search results of rank 8
-      y7/  # Marakov-like search results of rank 7
+    tensor_name/
+      x16/  # search results from method denoted by x of rank 16
+      x15/  # search results from method denoted by x of rank 15
+      y14/  # search results from method denoted by y of rank 14
   ```
 
 ### Python Scripts
@@ -42,7 +43,7 @@ This project contains C++ and Python code developed for a research paper on find
 
 ---
 
-## ⚙Build Instructions
+## Build Instructions
 
 Compile the C++ code with:
 
@@ -62,7 +63,7 @@ To run a single flip graph search:
 ./flip 222.exp 100000
 ```
 
-- `222.exp`: Input decomposition (e.g., rank-8 standard `<2,2,2>` tensor).
+- `222.exp`: Input decomposition (e.g., rank 8 standard `<2,2,2>` tensor).
 - `100000`: Number of steps to explore in the flip graph.
 
 Output:
@@ -110,7 +111,13 @@ If successful, it will create:
 solutions/example1/x7/
 ```
 
-Containing 25 rank-7 commutative decompositions of `<2,2,2>`.
+containing 25 rank 7 commutative decompositions of `<2,2,2>`. If it found some decompositions of rank 6 it would also create:
+
+```
+solutions/example1/x6/
+```
+
+containing 25 rank 6 commutative decompositions of `<2,2,2>`, though it shouldn't and hence it will stop at rank 7.
 
 ---
 
@@ -122,18 +129,8 @@ python3 down.py example2 y 1000000 100 25 8
 ```
 
 - `example2`: Refers to the `<3,3,3>` matrix multiplication tensor.
-- `x`, `y`: Search strategies from different initial schemes.
-
----
-
-## Notes
-
-- The flip graph search is **stochastic** — results may vary between runs.
-- Tensor decompositions are saved in `.exp` format for reuse and inspection.
-- This project is research-oriented and assumes some familiarity with:
-  - Tensor rank
-  - Commutative decompositions
-  - Matrix multiplication complexity
+- `x`: Search from the standard decomposition.
+- `y`: Search from Marakov-like schemes found of rank 22
 
 ---
 
@@ -141,10 +138,4 @@ python3 down.py example2 y 1000000 100 25 8
 
 This code was developed as part of research on exploring flip graph methods for reducing tensor rank in commutative matrix multiplication. For more details, see the accompanying paper:
 
-**[Insert paper title/link here]**
-
----
-
-## License
-
-[MIT License or your preferred license here]
+**https://arxiv.org/pdf/2506.22113**
