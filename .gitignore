@@ -4,8 +4,10 @@ flip
 github PAT.txt
 #the output files
 k*.exp
-#the solutions folder
-solutions
+#the large solutions folders
+solutions/*
+!solutions/example
+!solutions/example/*
 #helper python/sage files (for folder management)
 *.py
 !down.py
