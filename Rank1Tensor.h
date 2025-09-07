@@ -1,6 +1,8 @@
 #ifndef RANK1TENSOR_H
 #define RANK1TENSOR_H
 #include <string>
+#include <unistd.h>
+#include <cstdint>
 
 using namespace std;
 
